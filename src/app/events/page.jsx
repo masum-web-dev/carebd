@@ -7,7 +7,7 @@ import { Calendar, MapPin, Search, Plus, ArrowRight, Sparkles, User } from "luci
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export default function UpcomingEvents() {
+export default function Events() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState("All");
@@ -74,7 +74,7 @@ export default function UpcomingEvents() {
                         </p>
                     </div>
 
-                    <Link href="/dashboard/create-event">
+                    <Link href="/create-event">
                         <Button className="py-6 px-6 rounded-2xl bg-gradient-to-r from-[#554bb9] to-[#af136a] text-white font-medium text-sm flex items-center gap-2 hover:opacity-95 transition transform hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(85,75,185,0.4)] border-0 cursor-pointer">
                             <Plus size={18} />
                             <span>Create Event</span>
@@ -82,7 +82,7 @@ export default function UpcomingEvents() {
                     </Link>
                 </div>
 
-                {/* Filter & Search Bar Section (Fixed Overlap & Layout) */}
+                {/* Filter & Search Bar Section */}
                 <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4 bg-[#070b19]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
                     
                     {/* Category Tabs */}
@@ -136,8 +136,9 @@ export default function UpcomingEvents() {
                                     <div className="relative h-52 w-full overflow-hidden">
                                         <div className="absolute inset-0 bg-gradient-to-t from-[#070b19] via-transparent to-transparent z-10 opacity-80" />
                                         <img 
-                                            src={event.imageUrl || "https://images.unsplash.com/photo-1532629345422-7515f3d16bb9"} 
+                                            src={event.imageUrl && event.imageUrl.startsWith("http") ? event.imageUrl : "https://images.unsplash.com/photo-1532629345422-7515f3d16bb9"} 
                                             alt={event.title}
+                                            onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1532629345422-7515f3d16bb9"; }}
                                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                         />
                                         {/* Category Badge */}
@@ -180,7 +181,7 @@ export default function UpcomingEvents() {
                                     <Link href={`/events/${event._id || index}`} className="block">
                                         <Button className="w-full py-5 rounded-xl bg-white/5 border border-white/10 text-white font-medium text-xs flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-[#554bb9] group-hover:to-[#af136a] group-hover:border-0 transition-all duration-300 cursor-pointer">
                                             <span>View Event</span>
-                                            <ArrowRight size= {15} className="group-hover:translate-x-1 transition-transform" />
+                                            <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
                                         </Button>
                                     </Link>
                                 </div>

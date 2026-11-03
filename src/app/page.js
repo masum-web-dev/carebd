@@ -8,7 +8,7 @@ import Hero from "@/components/Hero";
 import MarqueeText from "@/components/MarqueeText";
 import Newsletter from "@/components/Newsletter";
 import Testimonials from "@/components/Testimonials";
-import UpcomingEvents from "@/components/Upcoming-events";
+import UpcomingEvents from "@/components/Events";
 
 export default function Home() {
   const [showIntro, setShowIntro] = useState(true);
