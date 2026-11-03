@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Calendar as CalendarIcon, MapPin, Image as ImageIcon, FileText, Tag, Type, ArrowLeft, Sparkles, ChevronDown, CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ export default function CreateEventPage() {
     const [today, setToday] = useState("");
     const [showToast, setShowToast] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const router = useRouter();
 
     useEffect(() => {
         const currentDate = new Date().toISOString().split("T")[0];
@@ -68,17 +70,11 @@ export default function CreateEventPage() {
                 body: JSON.stringify(eventData),
             });
 
-            const data = await res.json();
-
             if (res.ok) {
-                // Form reset
-                setEventData(initialFormState);
-                
-                // Show Custom Toast
                 setShowToast(true);
                 setTimeout(() => {
-                    setShowToast(false);
-                }, 3500);
+                    router.push("/events");
+                }, 1000);
             }
         } catch (error) {
             console.error("Failed to submit event:", error);
@@ -90,7 +86,6 @@ export default function CreateEventPage() {
     return (
         <div className="min-h-screen w-full bg-[#030215] text-white flex flex-col items-center justify-start p-4 sm:p-8 relative overflow-hidden select-none">
 
-            {/* Floating Toast Notification */}
             {showToast && (
                 <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3 bg-[#070b19]/90 border border-emerald-500/50 text-white px-5 py-3.5 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.3)] backdrop-blur-xl animate-in fade-in slide-in-from-bottom-5 duration-300">
                     <CheckCircle2 className="text-emerald-400" size={20} />
@@ -101,28 +96,24 @@ export default function CreateEventPage() {
                 </div>
             )}
 
-            {/* Floating Bubbles / Orbs Background Animation */}
             <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
                 <div className="absolute top-[15%] left-[15%] w-80 h-80 bg-[#554bb9]/80 rounded-full blur-[45px] animate-bubble-one shadow-[0_0_80px_rgba(85,75,185,0.6)]" />
                 <div className="absolute bottom-[10%] right-[10%] w-96 h-96 bg-[#af136a]/70 rounded-full blur-[50px] animate-bubble-two shadow-[0_0_100px_rgba(175,19,106,0.5)]" />
                 <div className="absolute top-[40%] right-[35%] w-72 h-72 bg-[#79dce8]/60 rounded-full blur-[40px] animate-bubble-three shadow-[0_0_70px_rgba(121,220,232,0.4)]" />
             </div>
 
-            {/* Top Navigation Back Link */}
             <div className="w-full max-w-3xl relative z-10 mb-6">
                 <Link 
-                    href="/dashboard" 
+                    href="/events" 
                     className="inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition"
                 >
                     <ArrowLeft size={16} />
-                    <span>Back to Upcoming Events</span>
+                    <span>Back to Events</span>
                 </Link>
             </div>
 
-            {/* Main Glassmorphism Card */}
             <div className="w-full max-w-3xl bg-[#070b19]/85 border border-white/10 rounded-3xl p-6 sm:p-10 backdrop-blur-xl shadow-2xl relative z-10 mb-12">
 
-                {/* Header Badge & Title */}
                 <div className="mb-8">
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#554bb9]/20 border border-[#554bb9]/40 text-[#79dce8] text-xs font-mono mb-3">
                         <Sparkles size={13} />
@@ -136,10 +127,8 @@ export default function CreateEventPage() {
                     </p>
                 </div>
 
-                {/* Form Section */}
                 <form onSubmit={handleSubmit} className="space-y-6">
 
-                    {/* 1. Event Title */}
                     <div className="space-y-2">
                         <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">
                             Event Title <span className="text-[#af136a]">*</span>
@@ -158,9 +147,7 @@ export default function CreateEventPage() {
                         </div>
                     </div>
 
-                    {/* 2. Event Type & Future Date (Grid) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Event Category with Dropdown Icon */}
                         <div className="space-y-2">
                             <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">
                                 Event Type <span className="text-[#af136a]">*</span>
@@ -183,7 +170,6 @@ export default function CreateEventPage() {
                             </div>
                         </div>
 
-                        {/* Event Date (Future Only) */}
                         <div className="space-y-2">
                             <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">
                                 Event Date <span className="text-[#af136a]">*</span>
@@ -204,7 +190,6 @@ export default function CreateEventPage() {
                         </div>
                     </div>
 
-                    {/* 3. Location / Venue */}
                     <div className="space-y-2">
                         <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">
                             Location / Venue <span className="text-[#af136a]">*</span>
@@ -223,7 +208,6 @@ export default function CreateEventPage() {
                         </div>
                     </div>
 
-                    {/* 4. Thumbnail Image URL & Quick Presets */}
                     <div className="space-y-2">
                         <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">
                             Thumbnail Image URL <span className="text-[#af136a]">*</span>
@@ -240,7 +224,6 @@ export default function CreateEventPage() {
                                 className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-3 h-12 text-sm text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:border-[#af136a] transition"
                             />
                         </div>
-                        {/* Quick Presets */}
                         <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-gray-400">
                             <span className="font-mono text-[11px]">Quick photo presets:</span>
                             {photoPresets.map((preset, index) => (
@@ -256,7 +239,6 @@ export default function CreateEventPage() {
                         </div>
                     </div>
 
-                    {/* 5. Event Description */}
                     <div className="space-y-2">
                         <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">
                             Event Description <span className="text-[#af136a]">*</span>
@@ -274,13 +256,11 @@ export default function CreateEventPage() {
                         </div>
                     </div>
 
-                    {/* 6. Organizer Info */}
                     <div className="bg-[#030215]/40 border border-white/5 rounded-xl p-4 flex items-center justify-between text-xs text-gray-400">
                         <span>Organizer Email attached:</span>
                         <span className="font-mono text-white font-medium">{eventData.organizerEmail}</span>
                     </div>
 
-                    {/* Submit Button */}
                     <Button
                         type="submit"
                         disabled={isSubmitting}
