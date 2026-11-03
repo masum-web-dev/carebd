@@ -3,15 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { Search, User, ChevronDown, Menu, X } from "lucide-react";
+import { User, ChevronDown, Menu, X, Calendar } from "lucide-react";
 
 export default function Navbar() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <nav className="bg-[#030215] text-white border-b border-white/10 sticky top-0 z-50">
-      {/* Container sizing increased to max-w-[1500px] */}
+      {/* Container sizing */}
       <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-10">
         <div className="flex items-center justify-between h-20">
           
@@ -32,11 +32,20 @@ export default function Navbar() {
           {/* Right Section (Desktop) */}
           <div className="hidden md:flex items-center space-x-6">
             
+            {/* Upcoming Events Nav Item */}
+            <Link
+              href="/events"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition border border-white/10 text-sm font-medium text-gray-300 hover:text-white"
+            >
+              <Calendar size={16} className="text-[#79dce8]" />
+              <span>Upcoming Events</span>
+            </Link>
+
             {/* Join With Us Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-3 px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition border border-white/10 focus:outline-none"
+                className="flex items-center gap-3 px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 transition border border-white/10 focus:outline-none cursor-pointer"
               >
                 <div className="w-8 h-8 rounded-full bg-gradient-to-r from-[#554bb9] to-[#af136a] flex items-center justify-center text-white">
                   <User size={18} />
@@ -71,69 +80,43 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Search Box */}
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search here..."
-                className="w-72 sm:w-80 pl-4 pr-10 py-2.5 rounded-lg bg-[#554bb9]/20 border border-[#554bb9]/40 focus:border-[#af136a] text-sm text-white placeholder-gray-400 focus:outline-none transition"
-              />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white">
-                <Search size={18} />
-              </button>
-            </div>
-
           </div>
 
           {/* Mobile Menu Toggle Button */}
           <div className="md:hidden flex items-center gap-3">
             <button
-              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="p-2 rounded-lg bg-white/5 text-gray-300 hover:text-white"
             >
-              <Search size={20} />
-            </button>
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className="p-2 rounded-lg bg-white/5 text-gray-300 hover:text-white"
-            >
-              {isDropdownOpen ? <X size={24} /> : <Menu size={24} />}
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
 
         </div>
       </div>
 
-      {/* Mobile Search Overlay/Input */}
-      {isSearchOpen && (
-        <div className="md:hidden px-4 pb-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search here..."
-              className="w-full pl-4 pr-10 py-2 rounded-lg bg-[#554bb9]/20 border border-[#554bb9]/40 text-sm text-white placeholder-gray-400 focus:outline-none"
-            />
-            <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300">
-              <Search size={18} />
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Mobile Dropdown Menu */}
-      {isDropdownOpen && (
-        <div className="md:hidden bg-[#030215] border-t border-white/10 px-4 py-3 space-y-2">
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-[#030215] border-t border-white/10 px-4 py-4 space-y-3">
+          <Link
+            href="/events"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="flex items-center gap-2 py-2 text-gray-300 hover:text-white border-b border-white/5 text-sm font-medium"
+          >
+            <Calendar size={16} className="text-[#79dce8]" />
+            <span>Upcoming Events</span>
+          </Link>
           <Link
             href="/login"
-            onClick={() => setIsDropdownOpen(false)}
-            className="block py-2 text-gray-300 hover:text-white border-b border-white/5"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block py-2 text-gray-300 hover:text-white border-b border-white/5 text-sm font-medium"
           >
             Login
           </Link>
           <Link
             href="/register"
-            onClick={() => setIsDropdownOpen(false)}
-            className="block py-2 text-gray-300 hover:text-white"
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="block py-2 text-gray-300 hover:text-white text-sm font-medium"
           >
             Register
           </Link>
