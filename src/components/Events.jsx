@@ -6,12 +6,16 @@ import Image from "next/image";
 import { Calendar, MapPin, Search, Plus, ArrowRight, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 
 export default function Events() {
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
+
+    // Better Auth সেশন হুক
+    const { data: session } = authClient.useSession();
 
     const categories = [
         "All",
@@ -24,19 +28,28 @@ export default function Events() {
     ];
 
     useEffect(() => {
+        let isMounted = true;
         const fetchEvents = async () => {
             try {
                 const res = await fetch("http://localhost:8000/events");
                 const data = await res.json();
-                setEvents(Array.isArray(data) ? data : []);
+                if (isMounted) {
+                    setEvents(Array.isArray(data) ? data : []);
+                }
             } catch (err) {
                 console.error("Failed to fetch events:", err);
             } finally {
-                setLoading(false);
+                if (isMounted) {
+                    setLoading(false);
+                }
             }
         };
 
         fetchEvents();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     const filteredEvents = events.filter((event) => {
@@ -76,7 +89,8 @@ export default function Events() {
                             </p>
                         </div>
 
-                        <Link href="/dashboard/create-event">
+                        {/* লজিক চেক: লগইন না থাকলে রেজিস্টার পেজে রিডাইরেক্ট করবে */}
+                        <Link href={session ? "/dashboard/create-event" : "/register"}>
                             <Button className="py-6 px-6 rounded-2xl bg-gradient-to-r from-[#554bb9] to-[#af136a] text-white font-medium text-sm flex items-center gap-2 hover:opacity-95 transition transform hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(85,75,185,0.4)] border-0 cursor-pointer">
                                 <Plus size={18} />
                                 <span>Create Event</span>
@@ -128,7 +142,7 @@ export default function Events() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {filteredEvents.map((event, index) => (
                                 <div 
-                                    key={index}
+                                    key={event._id || index}
                                     className="group bg-[#070b19]/85 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-xl hover:border-[#554bb9]/60 transition-all duration-500 hover:shadow-[0_0_35px_rgba(85,75,185,0.25)] hover:-translate-y-1.5 flex flex-col justify-between"
                                 >
                                     <div>
@@ -173,7 +187,8 @@ export default function Events() {
                                             <span className="truncate font-mono text-[11px] text-gray-300">{event.organizerEmail}</span>
                                         </div>
 
-                                        <Link href={`events/${event._id || index}`} className="block">
+                                        {/* লজিক চেক: লগইন করা না থাকলে View Event এ ক্লিক করলে রেজিস্টার পেজে পাঠাবে */}
+                                        <Link href={session ? `events/${event._id || index}` : "/register"} className="block">
                                             <Button className="w-full py-5 rounded-xl bg-white/5 border border-white/10 text-white font-medium text-xs flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-[#554bb9] group-hover:to-[#af136a] group-hover:border-0 transition-all duration-300 cursor-pointer">
                                                 <span>View Event</span>
                                                 <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />

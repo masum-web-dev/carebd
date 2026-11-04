@@ -3,8 +3,12 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { Compass, PlusCircle } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
 
 export default function Hero() {
+  // Better Auth সেশন হুক
+  const { data: session } = authClient.useSession();
+
   useEffect(() => {
     const ORDER = ['earth', 'venus', 'mars'];
     let currentFeatured = 'earth';
@@ -113,7 +117,7 @@ export default function Hero() {
           <video data-planet="mars" className="absolute inset-0 w-full h-full object-cover opacity-0 z-0 transition-opacity duration-300" muted loop playsInline preload="none" data-src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202422_51eae59a-2459-4c84-907c-cc5edfe5fea7.mp4" poster="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260827_202133_0ba6de7c-285d-43dc-b7ab-8c54c73707cb.png" aria-hidden="true"></video>
         </div>
 
-        {/* Center Content Box - Positioned higher using absolute top-[38%] and -translate-y-1/2 */}
+        {/* Center Content Box */}
         <div className="absolute left-1/2 top-[38%] -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center justify-center text-center px-4 w-full max-w-5xl pointer-events-none">
           <h1 className="font-heading text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight mb-4 pointer-events-auto leading-tight">
             <span className="text-white">One Pre-Loved Garment,</span> <br />
@@ -122,16 +126,18 @@ export default function Hero() {
           <p className="font-sans text-gray-200 text-base sm:text-lg md:text-xl max-w-2xl mb-8 pointer-events-auto leading-relaxed">
             Bring warmth and smiles to those in need by sharing your gently used clothes. Join or create events on CareBD to make a meaningful difference today.
           </p>
+          
+          {/* টার্নারি অপারেটর ব্যবহার করে লগইন চেক করা হয়েছে */}
           <div className="flex flex-col sm:flex-row items-center gap-4 pointer-events-auto">
             <Link
-              href="/events"
+              href={session ? "/events" : "/register"}
               className="flex items-center gap-2 px-7 py-3.5 rounded-full bg-gradient-to-r from-[#554bb9] to-[#af136a] text-white font-sans font-medium text-base shadow-lg hover:opacity-90 transition transform hover:scale-105"
             >
               <Compass size={20} />
               Explore Upcoming Events
             </Link>
             <Link
-              href="/create-event"
+              href={session ? "/create-event" : "/register"}
               className="flex items-center gap-2 px-7 py-3.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-white font-sans font-medium text-base backdrop-blur-md transition transform hover:scale-105"
             >
               <PlusCircle size={20} />

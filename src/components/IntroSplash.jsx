@@ -50,7 +50,7 @@ export default function IntroSplash({ onFinish }) {
         {/* Emotional Header & Welcome */}
         <div className="space-y-3">
           <span className="text-[#79dce8] font-mono tracking-widest text-sm uppercase">
-            // Welcome to CareBD //
+            // Thanks for joining with us //
           </span>
           <h1 className="text-3xl sm:text-5xl font-serif font-bold tracking-tight text-white leading-tight">
             Share Warmth, <span className="text-[#af136a]">Spread Smiles</span>
