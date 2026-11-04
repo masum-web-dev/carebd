@@ -13,7 +13,6 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
 import { authClient } from "@/lib/auth-client";
 
@@ -67,7 +66,24 @@ export default function Events() {
         try {
             const eventsRes = await fetch("http://localhost:8000/events");
             const eventsData = await eventsRes.json();
-            setEvents(Array.isArray(eventsData) ? eventsData : []);
+            
+            const eventsList = Array.isArray(eventsData) ? eventsData : [];
+
+            // আজকের তারিখের সবচেয়ে কাছের ও সামনের ডেট অনুযায়ী সর্ট করা (Closest upcoming first)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            eventsList.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                
+                const diffA = Math.abs(dateA - today);
+                const diffB = Math.abs(dateB - today);
+
+                return diffA - diffB;
+            });
+
+            setEvents(eventsList);
 
             if (session?.user?.email) {
                 const joinedRes = await fetch(`http://localhost:8000/joined-events?email=${session.user.email}`);
@@ -192,7 +208,7 @@ export default function Events() {
                             Upcoming Events
                         </h1>
                         <p className="text-gray-400 text-xs sm:text-sm mt-1.5 max-w-xl">
-                            Discover verified volunteer initiatives scheduled for upcoming dates. Past events are automatically excluded so you can focus on active drives that need support.
+                            Discover verified volunteer initiatives scheduled for upcoming dates. Closest dates are prioritized automatically.
                         </p>
                     </div>
 
