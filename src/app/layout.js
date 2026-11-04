@@ -25,14 +25,14 @@ export default function RootLayout({ children }) {
   return (
     <html
       lang="en"
-      className={`${robotoMono.variable} ${rubik.variable} h-full antialiased`}
+      className={`${robotoMono.variable} ${rubik.variable} antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans bg-[#030215] text-white">
+      <body className="min-h-screen flex flex-col font-sans bg-[#030215] text-white">
         <SmoothScroll>
           <Navbar />
           <main className="flex-1">{children}</main>
+          <Footer />
         </SmoothScroll>
-        <Footer></Footer>
       </body>
     </html>
   );

@@ -37,7 +37,6 @@ export default function Home() {
                 if (isMounted) {
                     const eventsList = Array.isArray(eventsData) ? eventsData : [];
                     
-
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
 
@@ -81,15 +80,14 @@ export default function Home() {
     const filteredEvents = events.filter((event) => {
         const matchesCategory = selectedCategory === "All" || event.category === selectedCategory;
         const matchesSearch = event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              event.location?.toLowerCase().includes(searchQuery.toLowerCase());
+                            event.location?.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
     return (
-        <div className="w-full min-h-screen bg-[#030215] text-white py-8 px-4 sm:px-8 selection:bg-[#af136a] selection:text-white">
+        <div className="w-full bg-[#030215] text-white py-10 px-4 sm:px-8 selection:bg-[#af136a] selection:text-white">
             <div className="w-full max-w-7xl mx-auto space-y-8">
 
-                {/* Top Header Card */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-[#070b19]/80 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
                     <div>
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#554bb9]/20 border border-[#554bb9]/40 text-[#79dce8] text-xs font-mono mb-3">
@@ -97,7 +95,7 @@ export default function Home() {
                             <span>Future Community Drives</span>
                         </div>
                         <h1 className="text-3xl sm:text-4xl font-serif font-bold text-white tracking-tight">
-                            Create Events
+                            Explore Events
                         </h1>
                         <p className="text-gray-400 text-xs sm:text-sm mt-1.5 max-w-xl">
                             Discover verified volunteer initiatives scheduled for upcoming dates. Closest dates are prioritized automatically.
@@ -112,7 +110,6 @@ export default function Home() {
                     </Link>
                 </div>
 
-                {/* Filter and Search Bar */}
                 <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4 bg-[#070b19]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
                     
                     <div className="flex flex-wrap items-center gap-2 w-full">
@@ -143,7 +140,6 @@ export default function Home() {
                     </div>
                 </div>
 
-                {/* Events Grid */}
                 {loading ? (
                     <div className="text-center py-20 text-gray-400 font-mono text-sm animate-pulse">
                         Loading active community drives...
@@ -153,7 +149,7 @@ export default function Home() {
                         <p className="text-gray-400 text-sm">No community events found matching your criteria.</p>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-12">
                         {filteredEvents.map((event) => {
                             const eventId = event._id;
                             const isJoined = joinedEventIds.has(eventId);

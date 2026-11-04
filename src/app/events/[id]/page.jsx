@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 import EventActions from "@/components/EventActions";
 
-
 export default async function SingleEventPage({ params }) {
     const resolvedParams = await params;
     const eventId = resolvedParams.id;
@@ -19,13 +18,13 @@ export default async function SingleEventPage({ params }) {
     const jweToken = await auth.api.getToken({
         headers: await headers(),
     });
-    const token = jweToken?.token;
+    const token = jweToken?.token || jweToken;
 
-    console.log(jweToken?.token)
     try {
         const res = await fetch(`http://localhost:8000/events/${eventId}`, {
             headers: {
-                authorization: `Beare ${token}`,
+                authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
             },
             cache: "no-store"
         });
@@ -72,7 +71,6 @@ export default async function SingleEventPage({ params }) {
                             <span>{event.category || "Community Drive"}</span>
                         </div>
 
-                        {/* Top-Right Edit and Delete Buttons */}
                         <EventActions event={event} session={session} resolvedParamsId={eventId} type="top-actions" />
 
                         <div className="absolute bottom-6 left-6 right-6 z-20 space-y-3">
@@ -108,7 +106,6 @@ export default async function SingleEventPage({ params }) {
                                 <Share2 size={16} />
                             </Button>
                             
-                            {/* Join Button handled via Client Component */}
                             <EventActions event={event} session={session} resolvedParamsId={eventId} type="join-button" />
                         </div>
                     </div>
@@ -140,7 +137,7 @@ export default async function SingleEventPage({ params }) {
                                     </div>
                                 </div>
                                 <div className="pt-3 border-t border-white/5 flex items-center gap-2 text-[11px] text-[#79dce8] font-mono">
-                                    <ShieldCheck size5={15} />
+                                    <ShieldCheck size={15} />
                                     <span>Verified Platform Member</span>
                                 </div>
                             </div>
