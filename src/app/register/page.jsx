@@ -7,10 +7,11 @@ import { User, Mail, Image as ImageIcon, Lock, Eye, EyeOff, ArrowRight, Check, X
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/auth-client";
 
 export default function RegisterPage() {
     const [formData, setFormData] = useState({
-        fullName: "",
+        name: "",
         email: "",
         photoUrl: "",
         password: "",
@@ -18,17 +19,27 @@ export default function RegisterPage() {
 
     const [showPassword, setShowPassword] = useState(false);
 
-    const hasUpper = /[A-Z]/.test(formData.password);
-    const hasLower = /[a-z]/.test(formData.password);
-    const isMinLength = formData.password.length >= 6;
+    const hasUpper = /[A-Z]/.test(formData.password || "");
+    const hasLower = /[a-z]/.test(formData.password || "");
+    const isMinLength = (formData.password || "").length >= 8; // এটি ৮ ক্যারেক্টার করা হয়েছে
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Form Submitted:", formData);
+        const formdata = new FormData(e.target);
+        const user = Object.fromEntries(formdata.entries());
+        
+        const {data, error} = await authClient.signUp.email({
+            ...user,
+        })
+        if(data){
+            console.log(data)
+        }else{
+            console.log(error)
+        }
     };
 
     return (
@@ -36,13 +47,8 @@ export default function RegisterPage() {
 
             {/* Floating Bubbles / Orbs Background Animation - Extra Clear & Glowing */}
             <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
-                {/* Top-Left Purple Bubble */}
                 <div className="absolute top-[15%] left-[15%] w-80 h-80 bg-[#554bb9]/80 rounded-full blur-[45px] animate-bubble-one shadow-[0_0_80px_rgba(85,75,185,0.6)]" />
-                
-                {/* Bottom-Right Pink/Magenta Bubble */}
                 <div className="absolute bottom-[10%] right-[10%] w-96 h-96 bg-[#af136a]/70 rounded-full blur-[50px] animate-bubble-two shadow-[0_0_100px_rgba(175,19,106,0.5)]" />
-                
-                {/* Center-Right Cyan/Blue Accent Bubble */}
                 <div className="absolute top-[40%] right-[35%] w-72 h-72 bg-[#79dce8]/60 rounded-full blur-[40px] animate-bubble-three shadow-[0_0_70px_rgba(121,220,232,0.4)]" />
             </div>
 
@@ -53,7 +59,7 @@ export default function RegisterPage() {
                 <div className="flex flex-col items-center text-center mb-8">
                     <div className="p-3.5 rounded-2xl bg-[#030215] border border-white/10 mb-4 shadow-inner">
                         <Image
-                            src="/logo.png"
+                            src="/carebd logo.png"
                             alt="CareBD Logo"
                             width={90}
                             height={30}
@@ -80,9 +86,9 @@ export default function RegisterPage() {
                             <User className="absolute left-3.5 text-gray-400 z-10" size={18} />
                             <Input
                                 type="text"
-                                name="fullName"
+                                name="name"
                                 required
-                                value={formData.fullName}
+                                value={formData.name ?? ""}
                                 onChange={handleChange}
                                 placeholder="Tanvir Ahmed"
                                 className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-3 h-11 text-sm text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:border-[#af136a] transition"
@@ -101,7 +107,7 @@ export default function RegisterPage() {
                                 type="email"
                                 name="email"
                                 required
-                                value={formData.email}
+                                value={formData.email ?? ""}
                                 onChange={handleChange}
                                 placeholder="name@example.com"
                                 className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-3 h-11 text-sm text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:border-[#af136a] transition"
@@ -119,7 +125,7 @@ export default function RegisterPage() {
                             <Input
                                 type="url"
                                 name="photoUrl"
-                                value={formData.photoUrl}
+                                value={formData.photoUrl ?? ""}
                                 onChange={handleChange}
                                 placeholder="https://images.unsplash.com/..."
                                 className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-3 h-11 text-sm text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:border-[#af136a] transition"
@@ -141,7 +147,7 @@ export default function RegisterPage() {
                                 type={showPassword ? "text" : "password"}
                                 name="password"
                                 required
-                                value={formData.password}
+                                value={formData.password ?? ""}
                                 onChange={handleChange}
                                 placeholder="••••••••"
                                 className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-10 py-3 h-11 text-sm text-white placeholder:text-gray-500 focus-visible:ring-0 focus-visible:border-[#af136a] transition"
@@ -167,7 +173,7 @@ export default function RegisterPage() {
                             </div>
                             <div className={`flex items-center gap-2 ${isMinLength ? "text-emerald-400" : "text-gray-400"}`}>
                                 {isMinLength ? <Check size={14} /> : <X size={14} />}
-                                <span>Minimum 6 characters length</span>
+                                <span>Minimum 8 characters length</span>
                             </div>
                         </div>
                     </div>
