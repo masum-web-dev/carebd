@@ -93,7 +93,11 @@ export default function SingleEventPage({ params }) {
 
     const fetchEventDetails = async (eventId) => {
         try {
-            const res = await fetch(`http://localhost:8000/events/${eventId}`);
+            const res = await fetch(`http://localhost:8000/events/${eventId}`,{
+                headers: {
+                    authorization: 'user logged in'
+                }
+            });
             if (res.ok) {
                 const data = await res.json();
                 setEvent(data);
