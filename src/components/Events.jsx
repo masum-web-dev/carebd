@@ -14,7 +14,6 @@ export default function Events() {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [searchQuery, setSearchQuery] = useState("");
 
-    // Better Auth সেশন হুক
     const { data: session } = authClient.useSession();
 
     const categories = [
@@ -89,7 +88,7 @@ export default function Events() {
                             </p>
                         </div>
 
-                        {/* লজিক চেক: লগইন না থাকলে রেজিস্টার পেজে রিডাইরেক্ট করবে */}
+
                         <Link href={session ? "/dashboard/create-event" : "/register"}>
                             <Button className="py-6 px-6 rounded-2xl bg-gradient-to-r from-[#554bb9] to-[#af136a] text-white font-medium text-sm flex items-center gap-2 hover:opacity-95 transition transform hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(85,75,185,0.4)] border-0 cursor-pointer">
                                 <Plus size={18} />
@@ -187,7 +186,7 @@ export default function Events() {
                                             <span className="truncate font-mono text-[11px] text-gray-300">{event.organizerEmail}</span>
                                         </div>
 
-                                        {/* লজিক চেক: লগইন করা না থাকলে View Event এ ক্লিক করলে রেজিস্টার পেজে পাঠাবে */}
+
                                         <Link href={session ? `events/${event._id || index}` : "/register"} className="block">
                                             <Button className="w-full py-5 rounded-xl bg-white/5 border border-white/10 text-white font-medium text-xs flex items-center justify-center gap-2 group-hover:bg-gradient-to-r group-hover:from-[#554bb9] group-hover:to-[#af136a] group-hover:border-0 transition-all duration-300 cursor-pointer">
                                                 <span>View Event</span>

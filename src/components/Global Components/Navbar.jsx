@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { User, ChevronDown, Menu, X, Calendar, PlusCircle, Settings, CheckCircle2, LogOut } from "lucide-react";
+import { User, ChevronDown, Menu, X, Calendar, PlusCircle, CheckCircle2, LogOut } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 
 export default function Navbar() {
@@ -48,7 +48,7 @@ export default function Navbar() {
           {/* Right Section (Desktop) */}
           <div className="hidden md:flex items-center space-x-6">
             
-            {/* Upcoming Events Nav Item (টার্নারি অপারেটর ব্যবহার করে চেক করা হয়েছে) */}
+            {/* Upcoming Events Nav Item */}
             {session ? (
               <Link
                 href="/events"
@@ -71,7 +71,7 @@ export default function Navbar() {
             {isPending ? (
               <div className="text-xs text-gray-400 font-mono">Loading...</div>
             ) : session ? (
-              /* User Logged In Profile Dropdown (ছবি অনুযায়ী ডিজাইন করা) */
+              /* User Logged In Profile Dropdown */
               <div className="relative">
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
@@ -103,7 +103,7 @@ export default function Navbar() {
 
                     <div className="py-1">
                       <Link
-                        href="/events/create"
+                        href="/create-event"
                         onClick={() => setIsDropdownOpen(false)}
                         className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:text-white hover:bg-white/5 transition"
                       >
@@ -111,15 +111,7 @@ export default function Navbar() {
                         <span>Create Event</span>
                       </Link>
                       <Link
-                        href="/events/manage"
-                        onClick={() => setIsDropdownOpen(false)}
-                        className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:text-white hover:bg-white/5 transition"
-                      >
-                        <Settings size={15} className="text-[#554bb9]" />
-                        <span>Manage Events</span>
-                      </Link>
-                      <Link
-                        href="/events/joined"
+                        href="/joined-event"
                         onClick={() => setIsDropdownOpen(false)}
                         className="flex items-center gap-2.5 px-4 py-2.5 text-xs text-gray-300 hover:text-white hover:bg-white/5 transition"
                       >
@@ -226,21 +218,14 @@ export default function Navbar() {
                 <span>Upcoming Events</span>
               </Link>
               <Link
-                href="/events/create"
+                href="/create-event"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block py-2 text-gray-300 hover:text-white border-b border-white/5 text-sm font-medium"
               >
                 Create Event
               </Link>
               <Link
-                href="/events/manage"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-2 text-gray-300 hover:text-white border-b border-white/5 text-sm font-medium"
-              >
-                Manage Events
-              </Link>
-              <Link
-                href="/events/joined"
+                href="/joined-event"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block py-2 text-gray-300 hover:text-white border-b border-white/5 text-sm font-medium"
               >

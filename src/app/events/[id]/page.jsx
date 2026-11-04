@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Calendar, MapPin, ArrowLeft, Sparkles, User, ShieldCheck, Share2, HeartHandshake, Edit3, Trash2, Calendar as CalendarIcon, Image as ImageIcon, Type, Tag, ChevronDown, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Calendar, MapPin, ArrowLeft, Sparkles, User, ShieldCheck, Share2, HeartHandshake, CheckCircle2, Edit3, Trash2, AlertTriangle, Type, Tag, Image as ImageIcon, ChevronDown, Calendar as CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,21 +14,27 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from "@/components/ui/dialog";
+import { authClient } from "@/lib/auth-client";
 
 export default function SingleEventPage({ params }) {
     const [resolvedParams, setResolvedParams] = useState(null);
     const [event, setEvent] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isJoined, setIsJoined] = useState(false);
+    
+    // Edit & Delete States
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const [deleteInputText, setDeleteInputText] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+
     const [toastMessage, setToastMessage] = useState("");
     const [showToast, setShowToast] = useState(false);
     const router = useRouter();
+
+    const { data: session } = authClient.useSession();
 
     const [eventData, setEventData] = useState({
         title: "",
@@ -66,6 +72,25 @@ export default function SingleEventPage({ params }) {
         unwrapParams();
     }, [params]);
 
+    useEffect(() => {
+        if (!session?.user?.email || !resolvedParams?.id) return;
+
+        const checkJoinedStatus = async () => {
+            try {
+                const res = await fetch(`http://localhost:8000/joined-events?email=${session.user.email}`);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    const alreadyJoined = data.some((item) => item.eventId === resolvedParams.id);
+                    setIsJoined(alreadyJoined);
+                }
+            } catch (err) {
+                console.error("Failed to check joined status:", err);
+            }
+        };
+
+        checkJoinedStatus();
+    }, [session, resolvedParams]);
+
     const fetchEventDetails = async (eventId) => {
         try {
             const res = await fetch(`http://localhost:8000/events/${eventId}`);
@@ -89,20 +114,49 @@ export default function SingleEventPage({ params }) {
         }
     };
 
-    const handleChange = (e) => {
-        setEventData({ ...eventData, [e.target.name]: e.target.value });
-    };
-
-    const handlePresetClick = (url) => {
-        setEventData({ ...eventData, imageUrl: url });
-    };
-
     const triggerToast = (message) => {
         setToastMessage(message);
         setShowToast(true);
-        setTimeout(() => {
-            setShowToast(false);
-        }, 3500);
+        setTimeout(() => setShowToast(false), 3500);
+    };
+
+    const handleJoinEvent = async () => {
+        if (!session) {
+            router.push("/login");
+            return;
+        }
+
+        if (isJoined) return;
+
+        const joinPayload = {
+            eventId: resolvedParams.id,
+            title: event.title,
+            category: event.category,
+            date: event.date,
+            location: event.location,
+            imageUrl: event.imageUrl,
+            userEmail: session.user.email,
+            userName: session.user.name,
+        };
+
+        try {
+            const res = await fetch("http://localhost:8000/joined-events", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(joinPayload),
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                setIsJoined(true);
+                triggerToast("Successfully joined this event!");
+            } else {
+                triggerToast(data.message || "You have already joined this event.");
+            }
+        } catch (err) {
+            console.error("Failed to join event:", err);
+        }
     };
 
     const handleUpdate = async (e) => {
@@ -112,9 +166,7 @@ export default function SingleEventPage({ params }) {
         try {
             const res = await fetch(`http://localhost:8000/events/${resolvedParams.id}`, {
                 method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(eventData),
             });
 
@@ -187,197 +239,17 @@ export default function SingleEventPage({ params }) {
 
             <div className="w-full max-w-5xl relative z-10 space-y-6 mb-12">
 
+                {/* Back Link and Action Buttons */}
                 <div className="flex items-center justify-between">
                     <Link href="/events" className="inline-flex items-center gap-2 text-xs font-mono text-gray-400 hover:text-white transition">
                         <ArrowLeft size={15} />
                         <span>Back to Events</span>
                     </Link>
-
-                    <div className="flex items-center gap-2">
-                        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                            <DialogTrigger className="h-9 px-3.5 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-300 hover:text-white hover:bg-white/10 flex items-center gap-1.5 cursor-pointer transition">
-                                <Edit3 size={14} className="text-[#79dce8]" />
-                                <span>Edit Event</span>
-                            </DialogTrigger>
-                            <DialogContent className="bg-[#070b19] border border-white/15 text-white max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl">
-                                <DialogHeader>
-                                    <DialogTitle className="text-xl font-serif">Edit Community Event</DialogTitle>
-                                    <DialogDescription className="text-xs text-gray-400">
-                                        Update the details of your social initiative below.
-                                    </DialogDescription>
-                                </DialogHeader>
-
-                                <form onSubmit={handleUpdate} className="space-y-4 pt-4">
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Event Title</Label>
-                                        <div className="relative flex items-center">
-                                            <Type className="absolute left-3.5 text-gray-400 z-10" size={16} />
-                                            <Input
-                                                type="text"
-                                                name="title"
-                                                required
-                                                value={eventData.title}
-                                                onChange={handleChange}
-                                                className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-2.5 h-10 text-xs text-white"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Event Type</Label>
-                                            <div className="relative flex items-center">
-                                                <Tag className="absolute left-3.5 text-gray-400 z-10 pointer-events-none" size={16} />
-                                                <select
-                                                    name="category"
-                                                    value={eventData.category}
-                                                    onChange={handleChange}
-                                                    className="w-full bg-[#030215] border border-white/10 rounded-xl pl-10 pr-10 py-2.5 h-10 text-xs text-white focus:outline-none appearance-none cursor-pointer"
-                                                >
-                                                    {categories.map((cat, idx) => (
-                                                        <option key={idx} value={cat} className="bg-[#070b19] text-white">
-                                                            {cat}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                                <ChevronDown className="absolute right-3.5 text-white/70 pointer-events-none" size={16} />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-1.5">
-                                            <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Event Date</Label>
-                                            <div className="relative flex items-center">
-                                                <CalendarIcon className="absolute left-3.5 text-gray-400 z-10 pointer-events-none" size={16} />
-                                                <Input
-                                                    type="date"
-                                                    name="date"
-                                                    required
-                                                    value={eventData.date}
-                                                    onChange={handleChange}
-                                                    className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-2.5 h-10 text-xs text-white [color-scheme:dark]"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Location / Venue</Label>
-                                        <div className="relative flex items-center">
-                                            <MapPin className="absolute left-3.5 text-gray-400 z-10" size={16} />
-                                            <Input
-                                                type="text"
-                                                name="location"
-                                                required
-                                                value={eventData.location}
-                                                onChange={handleChange}
-                                                className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-2.5 h-10 text-xs text-white"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Thumbnail Image URL</Label>
-                                        <div className="relative flex items-center">
-                                            <ImageIcon className="absolute left-3.5 text-gray-400 z-10" size={16} />
-                                            <Input
-                                                type="url"
-                                                name="imageUrl"
-                                                required
-                                                value={eventData.imageUrl}
-                                                onChange={handleChange}
-                                                className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-2.5 h-10 text-xs text-white"
-                                            />
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-gray-400">
-                                            <span>Quick presets:</span>
-                                            {photoPresets.map((preset, index) => (
-                                                <button
-                                                    key={index}
-                                                    type="button"
-                                                    onClick={() => handlePresetClick(preset.url)}
-                                                    className="text-[#79dce8] hover:underline cursor-pointer"
-                                                >
-                                                    {preset.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-1.5">
-                                        <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Event Description</Label>
-                                        <Textarea
-                                            name="description"
-                                            required
-                                            rows={3}
-                                            value={eventData.description}
-                                            onChange={handleChange}
-                                            className="w-full bg-[#030215]/60 border-white/10 rounded-xl p-3 text-xs text-white resize-none"
-                                        />
-                                    </div>
-
-                                    <Button
-                                        type="submit"
-                                        disabled={isSubmitting}
-                                        className="w-full py-5 rounded-xl bg-gradient-to-r from-[#554bb9] to-[#af136a] text-white font-medium text-xs cursor-pointer border-0"
-                                    >
-                                        {isSubmitting ? "Saving..." : "Save Changes"}
-                                    </Button>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
-
-                        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                            <DialogTrigger className="h-9 px-3.5 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400 hover:text-white hover:bg-red-500/20 flex items-center gap-1.5 cursor-pointer transition">
-                                <Trash2 size={14} />
-                                <span>Delete</span>
-                            </DialogTrigger>
-                            <DialogContent className="bg-[#070b19] border border-red-500/30 text-white max-w-md rounded-3xl p-6">
-                                <DialogHeader className="space-y-3">
-                                    <div className="w-10 h-10 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400">
-                                        <AlertTriangle size={20} />
-                                    </div>
-                                    <DialogTitle className="text-lg font-serif">Are you absolutely sure?</DialogTitle>
-                                    <DialogDescription className="text-xs text-gray-400 leading-relaxed">
-                                        This action cannot be undone. To confirm deletion, please type <span className="font-mono text-red-400 font-bold select-all">delete</span> below.
-                                    </DialogDescription>
-                                </DialogHeader>
-
-                                <form onSubmit={handleDeleteConfirm} className="space-y-4 pt-3">
-                                    <Input
-                                        type="text"
-                                        placeholder="Type 'delete' to confirm"
-                                        value={deleteInputText}
-                                        onChange={(e) => setDeleteInputText(e.target.value)}
-                                        className="w-full bg-[#030215]/80 border-white/10 rounded-xl px-4 py-2.5 h-10 text-xs text-white placeholder:text-gray-600 focus-visible:ring-0 focus-visible:border-red-500"
-                                    />
-                                    <div className="flex items-center justify-end gap-2 pt-2">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            onClick={() => {
-                                                setIsDeleteDialogOpen(false);
-                                                setDeleteInputText("");
-                                            }}
-                                            className="h-9 px-4 rounded-xl bg-white/5 border-white/10 text-xs text-gray-300 hover:bg-white/10 hover:text-white cursor-pointer"
-                                        >
-                                            Cancel
-                                        </Button>
-                                        <Button
-                                            type="submit"
-                                            disabled={deleteInputText.trim().toLowerCase() !== "delete" || isDeleting}
-                                            className="h-9 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-medium cursor-pointer border-0 disabled:opacity-40 disabled:cursor-not-allowed"
-                                        >
-                                            {isDeleting ? "Deleting..." : "Confirm Delete"}
-                                        </Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
-                    </div>
                 </div>
 
                 <div className="bg-[#070b19]/85 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-xl shadow-2xl">
 
+                    {/* Image Section with Edit and Delete buttons on top */}
                     <div className="relative h-72 sm:h-96 w-full overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-t from-[#070b19] via-black/40 to-transparent z-10" />
                         <img 
@@ -390,9 +262,28 @@ export default function SingleEventPage({ params }) {
                             className="w-full h-full object-cover"
                         />
                         
+                        {/* Category Badge */}
                         <div className="absolute top-4 left-4 z-20 px-3.5 py-1.5 rounded-full bg-[#030215]/80 border border-white/15 backdrop-blur-md text-xs font-mono text-[#79dce8] flex items-center gap-1.5 shadow-lg">
                             <Sparkles size={13} className="text-[#af136a]" />
                             <span>{event.category || "Community Drive"}</span>
+                        </div>
+
+                        {/* Edit and Delete Buttons on Top Right of the Image */}
+                        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+                            <button
+                                onClick={() => setIsDialogOpen(true)}
+                                className="h-9 px-3.5 rounded-xl bg-[#030215]/80 border border-white/20 text-xs text-gray-200 hover:text-white hover:bg-[#030215] flex items-center gap-1.5 backdrop-blur-md cursor-pointer transition shadow-lg"
+                            >
+                                <Edit3 size={14} className="text-[#79dce8]" />
+                                <span className="hidden sm:inline">Edit</span>
+                            </button>
+                            <button
+                                onClick={() => setIsDeleteDialogOpen(true)}
+                                className="h-9 px-3.5 rounded-xl bg-red-500/20 border border-red-500/40 text-xs text-red-300 hover:text-white hover:bg-red-600/60 flex items-center gap-1.5 backdrop-blur-md cursor-pointer transition shadow-lg"
+                            >
+                                <Trash2 size={14} />
+                                <span className="hidden sm:inline">Delete</span>
+                            </button>
                         </div>
 
                         <div className="absolute bottom-6 left-6 right-6 z-20 space-y-3">
@@ -427,9 +318,17 @@ export default function SingleEventPage({ params }) {
                             <Button variant="outline" className="h-11 px-4 rounded-xl bg-white/5 border-white/10 text-gray-300 hover:text-white hover:bg-white/10 cursor-pointer">
                                 <Share2 size={16} />
                             </Button>
-                            <Button className="h-11 px-6 rounded-xl bg-gradient-to-r from-[#554bb9] to-[#af136a] text-white font-medium text-xs flex items-center gap-2 hover:opacity-95 transition shadow-[0_0_20px_rgba(85,75,185,0.4)] border-0 cursor-pointer w-full sm:w-auto">
-                                <HeartHandshake size={16} />
-                                <span>Join Event</span>
+                            <Button 
+                                onClick={handleJoinEvent}
+                                disabled={isJoined}
+                                className={`h-11 px-6 rounded-xl font-medium text-xs flex items-center gap-2 transition shadow-lg border-0 cursor-pointer w-full sm:w-auto ${
+                                    isJoined 
+                                        ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 cursor-not-allowed opacity-80 shadow-none" 
+                                        : "bg-gradient-to-r from-[#554bb9] to-[#af136a] text-white hover:opacity-95 shadow-[0_0_20px_rgba(85,75,185,0.4)]"
+                                }`}
+                            >
+                                {isJoined ? <CheckCircle2 size={16} /> : <HeartHandshake size={16} />}
+                                <span>{isJoined ? "Joined" : "Join Event"}</span>
                             </Button>
                         </div>
                     </div>
@@ -493,6 +392,181 @@ export default function SingleEventPage({ params }) {
                 </div>
 
             </div>
+
+            {/* Edit Dialog Modal */}
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogContent className="bg-[#070b19] border border-white/15 text-white max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-serif">Edit Community Event</DialogTitle>
+                        <DialogDescription className="text-xs text-gray-400">
+                            Update the details of your social initiative below.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <form onSubmit={handleUpdate} className="space-y-4 pt-4">
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Event Title</Label>
+                            <div className="relative flex items-center">
+                                <Type className="absolute left-3.5 text-gray-400 z-10" size={16} />
+                                <Input
+                                    type="text"
+                                    name="title"
+                                    required
+                                    value={eventData.title}
+                                    onChange={(e) => setEventData({ ...eventData, title: e.target.value })}
+                                    className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-2.5 h-10 text-xs text-white"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Event Type</Label>
+                                <div className="relative flex items-center">
+                                    <Tag className="absolute left-3.5 text-gray-400 z-10 pointer-events-none" size={16} />
+                                    <select
+                                        name="category"
+                                        value={eventData.category}
+                                        onChange={(e) => setEventData({ ...eventData, category: e.target.value })}
+                                        className="w-full bg-[#030215] border border-white/10 rounded-xl pl-10 pr-10 py-2.5 h-10 text-xs text-white focus:outline-none appearance-none cursor-pointer"
+                                    >
+                                        {categories.map((cat, idx) => (
+                                            <option key={idx} value={cat} className="bg-[#070b19] text-white">
+                                                {cat}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-3.5 text-white/70 pointer-events-none" size={16} />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Event Date</Label>
+                                <div className="relative flex items-center">
+                                    <CalendarIcon className="absolute left-3.5 text-gray-400 z-10 pointer-events-none" size={16} />
+                                    <Input
+                                        type="date"
+                                        name="date"
+                                        required
+                                        value={eventData.date}
+                                        onChange={(e) => setEventData({ ...eventData, date: e.target.value })}
+                                        className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-2.5 h-10 text-xs text-white [color-scheme:dark]"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Location / Venue</Label>
+                            <div className="relative flex items-center">
+                                <MapPin className="absolute left-3.5 text-gray-400 z-10" size={16} />
+                                <Input
+                                    type="text"
+                                    name="location"
+                                    required
+                                    value={eventData.location}
+                                    onChange={(e) => setEventData({ ...eventData, location: e.target.value })}
+                                    className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-2.5 h-10 text-xs text-white"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Thumbnail Image URL</Label>
+                            <div className="relative flex items-center">
+                                <ImageIcon className="absolute left-3.5 text-gray-400 z-10" size={16} />
+                                <Input
+                                    type="url"
+                                    name="imageUrl"
+                                    required
+                                    value={eventData.imageUrl}
+                                    onChange={(e) => setEventData({ ...eventData, imageUrl: e.target.value })}
+                                    className="w-full bg-[#030215]/60 border-white/10 rounded-xl pl-10 pr-4 py-2.5 h-10 text-xs text-white"
+                                />
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-gray-400">
+                                <span>Quick presets:</span>
+                                {photoPresets.map((preset, index) => (
+                                    <button
+                                        key={index}
+                                        type="button"
+                                        onClick={() => setEventData({ ...eventData, imageUrl: preset.url })}
+                                        className="text-[#79dce8] hover:underline cursor-pointer"
+                                    >
+                                        {preset.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-mono text-gray-300 uppercase tracking-wider">Event Description</Label>
+                            <Textarea
+                                name="description"
+                                required
+                                rows={3}
+                                value={eventData.description}
+                                onChange={(e) => setEventData({ ...eventData, description: e.target.value })}
+                                className="w-full bg-[#030215]/60 border-white/10 rounded-xl p-3 text-xs text-white resize-none"
+                            />
+                        </div>
+
+                        <Button
+                            type="submit"
+                            disabled={isSubmitting}
+                            className="w-full py-5 rounded-xl bg-gradient-to-r from-[#554bb9] to-[#af136a] text-white font-medium text-xs cursor-pointer border-0"
+                        >
+                            {isSubmitting ? "Saving..." : "Save Changes"}
+                        </Button>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
+            {/* Delete Confirmation Modal */}
+            <Dialog open={isDeleteDialogOpen} onOpenChange={() => { setIsDeleteDialogOpen(false); setDeleteInputText(""); }}>
+                <DialogContent className="bg-[#070b19] border border-red-500/30 text-white max-w-md rounded-3xl p-6">
+                    <DialogHeader className="space-y-3">
+                        <div className="w-10 h-10 rounded-2xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-red-400">
+                            <AlertTriangle size={20} />
+                        </div>
+                        <DialogTitle className="text-lg font-serif">Are you absolutely sure?</DialogTitle>
+                        <DialogDescription className="text-xs text-gray-400 leading-relaxed">
+                            This action cannot be undone. To confirm deletion, please type <span className="font-mono text-red-400 font-bold select-all">delete</span> below.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <form onSubmit={handleDeleteConfirm} className="space-y-4 pt-3">
+                        <Input
+                            type="text"
+                            placeholder="Type 'delete' to confirm"
+                            value={deleteInputText}
+                            onChange={(e) => setDeleteInputText(e.target.value)}
+                            className="w-full bg-[#030215]/80 border-white/10 rounded-xl px-4 py-2.5 h-10 text-xs text-white placeholder:text-gray-600 focus-visible:ring-0 focus-visible:border-red-500"
+                        />
+                        <div className="flex items-center justify-end gap-2 pt-2">
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => {
+                                    setIsDeleteDialogOpen(false);
+                                    setDeleteInputText("");
+                                }}
+                                className="h-9 px-4 rounded-xl bg-white/5 border-white/10 text-xs text-gray-300 hover:bg-white/10 hover:text-white cursor-pointer"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                type="submit"
+                                disabled={deleteInputText.trim().toLowerCase() !== "delete" || isDeleting}
+                                className="h-9 px-4 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-medium cursor-pointer border-0 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                                {isDeleting ? "Deleting..." : "Confirm Delete"}
+                            </Button>
+                        </div>
+                    </form>
+                </DialogContent>
+            </Dialog>
+
         </div>
     );
 }
