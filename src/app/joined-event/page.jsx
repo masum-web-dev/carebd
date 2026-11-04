@@ -38,12 +38,18 @@ export default function JoinedEventsPage() {
     const handleCancelEvent = async (id) => {
         try {
             setCancellingId(id);
+            
+            const tokenResponse = await authClient.getToken();
+            const token = tokenResponse?.token || tokenResponse;
+
             const res = await fetch(`http://localhost:8000/joined-events/${id}`, {
                 method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
             });
 
             if (res.ok) {
-                // স্টেট থেকে রিমুভ করে UI আপডেট করা
                 setJoinedEvents((prev) => prev.filter((item) => (item._id || item.eventId) !== id));
             } else {
                 console.error("Failed to cancel event");

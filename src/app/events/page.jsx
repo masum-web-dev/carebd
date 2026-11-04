@@ -69,7 +69,6 @@ export default function Events() {
             
             const eventsList = Array.isArray(eventsData) ? eventsData : [];
 
-            // আজকের তারিখের সবচেয়ে কাছের ও সামনের ডেট অনুযায়ী সর্ট করা (Closest upcoming first)
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -128,9 +127,15 @@ export default function Events() {
         setIsSubmitting(true);
 
         try {
+            const tokenResponse = await authClient.getToken();
+            const token = tokenResponse?.token || tokenResponse;
+
             const res = await fetch(`http://localhost:8000/events/${editingEventId}`, {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json" },
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
                 body: JSON.stringify(eventData),
             });
 
@@ -152,8 +157,14 @@ export default function Events() {
         setIsDeleting(true);
 
         try {
+            const tokenResponse = await authClient.getToken();
+            const token = tokenResponse?.token || tokenResponse;
+
             const res = await fetch(`http://localhost:8000/events/${deletingEventId}`, {
                 method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
             });
             if (res.ok) {
                 setDeletingEventId(null);
@@ -171,7 +182,7 @@ export default function Events() {
     const filteredEvents = events.filter((event) => {
         const matchesCategory = selectedCategory === "All" || event.category === selectedCategory;
         const matchesSearch = event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                              event.location?.toLowerCase().includes(searchQuery.toLowerCase());
+                            event.location?.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
@@ -188,7 +199,6 @@ export default function Events() {
                 </div>
             )}
 
-            {/* Background Glow Effects */}
             <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden z-0">
                 <div className="absolute top-[10%] left-[10%] w-96 h-96 bg-[#554bb9]/70 rounded-full blur-[60px] animate-bubble-one shadow-[0_0_90px_rgba(85,75,185,0.5)]" />
                 <div className="absolute bottom-[15%] right-[10%] w-[400px] h-[400px] bg-[#af136a]/60 rounded-full blur-[70px] animate-bubble-two shadow-[0_0_120px_rgba(175,19,106,0.4)]" />
@@ -197,7 +207,6 @@ export default function Events() {
 
             <div className="w-full max-w-7xl relative z-10 space-y-8 mb-12">
 
-                {/* Top Header Card */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-[#070b19]/80 border border-white/10 rounded-3xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl">
                     <div>
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#554bb9]/20 border border-[#554bb9]/40 text-[#79dce8] text-xs font-mono mb-3">
@@ -220,7 +229,6 @@ export default function Events() {
                     </Link>
                 </div>
 
-                {/* Filter and Search Bar */}
                 <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-4 bg-[#070b19]/60 border border-white/10 rounded-2xl p-4 backdrop-blur-md">
                     <div className="flex flex-wrap items-center gap-2 w-full">
                         {categories.map((cat, idx) => (
@@ -250,7 +258,6 @@ export default function Events() {
                     </div>
                 </div>
 
-                {/* Events Grid */}
                 {loading ? (
                     <div className="text-center py-20 text-gray-400 font-mono text-sm animate-pulse">
                         Loading active community drives...
@@ -271,7 +278,6 @@ export default function Events() {
                                     className="group bg-[#070b19]/85 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-xl hover:border-[#554bb9]/60 transition-all duration-500 hover:shadow-[0_0_35px_rgba(85,75,185,0.25)] hover:-translate-y-1.5 flex flex-col justify-between"
                                 >
                                     <div>
-                                        {/* Image & Badges */}
                                         <div className="relative h-52 w-full overflow-hidden">
                                             <div className="absolute inset-0 bg-gradient-to-t from-[#070b19] via-transparent to-transparent z-10 opacity-80" />
                                             <img 
@@ -291,7 +297,6 @@ export default function Events() {
                                             </div>
                                         </div>
 
-                                        {/* Content Section */}
                                         <div className="p-6 space-y-4">
                                             <h3 className="text-xl font-bold font-serif text-white group-hover:text-[#79dce8] transition-colors line-clamp-1">
                                                 {event.title}
@@ -308,7 +313,6 @@ export default function Events() {
                                         </div>
                                     </div>
 
-                                    {/* Footer Section with View, Edit & Delete */}
                                     <div className="px-6 pb-6 pt-2 border-t border-white/5 space-y-3">
                                         <div className="flex items-center justify-between text-xs text-gray-400">
                                             <div className="flex items-center gap-1.5 truncate">
@@ -316,7 +320,6 @@ export default function Events() {
                                                 <span className="truncate font-mono text-[11px] text-gray-300 max-w-[140px]">{event.organizerEmail}</span>
                                             </div>
 
-                                            {/* Edit & Delete Buttons */}
                                             <div className="flex items-center gap-1.5">
                                                 <button 
                                                     onClick={() => handleOpenEdit(event)}
@@ -364,7 +367,6 @@ export default function Events() {
 
             </div>
 
-            {/* Edit Dialog Modal */}
             <Dialog open={!!editingEventId} onOpenChange={() => setEditingEventId(null)}>
                 <DialogContent className="bg-[#070b19] border border-white/15 text-white max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl">
                     <DialogHeader>
@@ -493,7 +495,6 @@ export default function Events() {
                 </DialogContent>
             </Dialog>
 
-            {/* Delete Confirmation Modal */}
             <Dialog open={!!deletingEventId} onOpenChange={() => { setDeletingEventId(null); setDeleteInputText(""); }}>
                 <DialogContent className="bg-[#070b19] border border-red-500/30 text-white max-w-md rounded-3xl p-6">
                     <DialogHeader className="space-y-3">

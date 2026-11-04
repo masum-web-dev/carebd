@@ -66,6 +66,8 @@ export default function CreateEventPage() {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    // Authorization header added here
+                    "Authorization": `Bearer ${localStorage.getItem("token") || ""}`,
                 },
                 body: JSON.stringify(eventData),
             });
