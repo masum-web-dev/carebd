@@ -31,7 +31,7 @@ export default function Home() {
 
         const fetchData = async () => {
             try {
-                const eventsRes = await fetch("http://localhost:8000/events");
+                const eventsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`);
                 const eventsData = await eventsRes.json();
                 
                 if (isMounted) {
@@ -54,7 +54,7 @@ export default function Home() {
                 }
 
                 if (session?.user?.email) {
-                    const joinedRes = await fetch(`http://localhost:8000/joined-events?email=${session.user.email}`);
+                    const joinedRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joined-events?email=${session.user.email}`);
                     const joinedData = await joinedRes.json();
                     if (isMounted && Array.isArray(joinedData)) {
                         const ids = new Set(joinedData.map((item) => item.eventId));

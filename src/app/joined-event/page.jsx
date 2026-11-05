@@ -34,7 +34,7 @@ export default function JoinedEventsPage() {
 
     const fetchJoinedEvents = async () => {
         try {
-            const res = await fetch(`http://localhost:8000/joined-events?email=${session.user.email}`);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joined-events?email=${session.user.email}`);
             const data = await res.json();
             if (Array.isArray(data)) {
                 setJoinedEvents(data);
@@ -54,7 +54,7 @@ export default function JoinedEventsPage() {
         try {
             setCancellingId(uniqueId);
             
-            const res = await fetch(`http://localhost:8000/joined-events/${uniqueId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joined-events/${uniqueId}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": "Bearer dummy-token-to-satisfy-middleware"
@@ -96,7 +96,7 @@ export default function JoinedEventsPage() {
 
         try {
             setIsSubmitting(true);
-            const res = await fetch(`http://localhost:8000/joined-events/${uniqueId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joined-events/${uniqueId}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

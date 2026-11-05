@@ -63,7 +63,7 @@ export default function Events() {
 
     const fetchEvents = async () => {
         try {
-            const eventsRes = await fetch("http://localhost:8000/events");
+            const eventsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events`);
             const eventsData = await eventsRes.json();
             
             const eventsList = Array.isArray(eventsData) ? eventsData : [];
@@ -84,7 +84,7 @@ export default function Events() {
             setEvents(eventsList);
 
             if (session?.user?.email) {
-                const joinedRes = await fetch(`http://localhost:8000/joined-events?email=${session.user.email}`);
+                const joinedRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joined-events?email=${session.user.email}`);
                 const joinedData = await joinedRes.json();
                 if (Array.isArray(joinedData)) {
                     const ids = new Set(joinedData.map((item) => item.eventId));
@@ -126,7 +126,7 @@ export default function Events() {
         setIsSubmitting(true);
 
         try {
-            const res = await fetch(`http://localhost:8000/events/${editingEventId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${editingEventId}`, {
                 method: "PATCH",
                 headers: { 
                     "Content-Type": "application/json",
@@ -153,7 +153,7 @@ export default function Events() {
         setIsDeleting(true);
 
         try {
-            const res = await fetch(`http://localhost:8000/events/${deletingEventId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${deletingEventId}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": "Bearer dummy-token-to-satisfy-middleware"

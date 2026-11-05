@@ -21,7 +21,7 @@ export default async function SingleEventPage({ params }) {
     const token = jweToken?.token || jweToken;
 
     try {
-        const res = await fetch(`http://localhost:8000/events/${eventId}`, {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${eventId}`, {
             headers: {
                 authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",

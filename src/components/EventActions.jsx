@@ -73,7 +73,7 @@ export default function EventActions({ event, session, resolvedParamsId, type })
         };
 
         try {
-            const res = await fetch("http://localhost:8000/joined-events", {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/joined-events`, {
                 method: "POST",
                 headers: { 
                     "Content-Type": "application/json",
@@ -100,7 +100,7 @@ export default function EventActions({ event, session, resolvedParamsId, type })
         setIsSubmitting(true);
 
         try {
-            const res = await fetch(`http://localhost:8000/events/${resolvedParamsId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${resolvedParamsId}`, {
                 method: "PATCH",
                 headers: { 
                     "Content-Type": "application/json",
@@ -127,7 +127,7 @@ export default function EventActions({ event, session, resolvedParamsId, type })
         setIsDeleting(true);
 
         try {
-            const res = await fetch(`http://localhost:8000/events/${resolvedParamsId}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/events/${resolvedParamsId}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": "Bearer dummy-token-to-satisfy-middleware"
