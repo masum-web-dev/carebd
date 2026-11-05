@@ -1,36 +1,32 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# CareBD 🚀
 
-## Getting Started
+CareBD is a modern MERN-stack application designed to manage and streamline social initiatives and community events.
 
-First, run the development server:
+## 🔗 Live Links
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+* **Frontend (Live):** [https://carebd-frontend.vercel.app](https://carebd-frontend.vercel.app)
+* **Backend API (Live):** [https://carebd-server.vercel.app](https://carebd-server.vercel.app)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack & Technologies Used
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### **Frontend**
+* **Framework:** Next.js (React)
+* **Styling:** Tailwind CSS
+* **Icons:** Lucide React
+* **Authentication:** Better Auth (Google & Email/Password)
 
-## Learn More
+### **Backend**
+* **Runtime & Framework:** Node.js, Express.js
+* **Database:** MongoDB & MongoDB Native Driver
+* **Security & Middleware:** CORS, Dotenv
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## ✨ Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+* User Authentication (Secure Sign-up, Login with Email/Password, and Google OAuth).
+* Create, update, view, and delete community events.
+* Join and manage event participation.
+* Fully responsive and modern dark-themed user interface.
